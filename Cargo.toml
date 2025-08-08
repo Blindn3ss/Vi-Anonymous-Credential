@@ -22,3 +22,6 @@ ark-serialize= "0.4"
 bbs_plus = "0.24.0"
 commitment = "0.2.3"
 sha2 = "0.10"  # for randomization
+
+[dev-dependencies]
+hex = "0.4"

@@ -1,4 +1,5 @@
-// Use ethers.js with a JSON-RPC provider to connect to the running Hardhat node
+// This file is now a placeholder for interacting with a Hardhat/Ethereum smart contract.
+// Remove the custom blockchain logic.
 
 require('dotenv').config();
 const { ethers } = require("ethers");
@@ -8,11 +9,9 @@ const path = require("path");
 // Connect to the running Hardhat node
 const provider = new ethers.JsonRpcProvider("http://localhost:8545");
 
-// Use the first account as the signer (default Hardhat account)
-async function getSigner() {
-  const accounts = await provider.listAccounts();
-  return provider.getSigner(accounts[0]);
-}
+// Use the first account's private key (from Hardhat node output)
+const FIRST_ACCOUNT_PRIVATE_KEY = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // <-- replace with your actual key
+const signer = new ethers.Wallet(FIRST_ACCOUNT_PRIVATE_KEY, provider);
 
 // Load the contract ABI
 const abi = JSON.parse(
@@ -23,15 +22,14 @@ const abi = JSON.parse(
 ).abi;
 
 // Get a deployed contract instance
-async function getVCRegistry() {
+function getVCRegistry() {
   const contractAddress = process.env.VC_REGISTRY_ADDRESS;
-  const signer = await getSigner();
   return new ethers.Contract(contractAddress, abi, signer);
 }
 
 // Issue a credential
 async function issueCredential(credId, to) {
-  const registry = await getVCRegistry();
+  const registry = getVCRegistry();
   const tx = await registry.issueCredential(credId, to);
   await tx.wait();
   return tx.hash;
@@ -39,7 +37,7 @@ async function issueCredential(credId, to) {
 
 // Revoke a credential
 async function revokeCredential(credId) {
-  const registry = await getVCRegistry();
+  const registry = getVCRegistry();
   const tx = await registry.revokeCredential(credId);
   await tx.wait();
   return tx.hash;
