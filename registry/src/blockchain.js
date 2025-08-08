@@ -10,7 +10,7 @@ const path = require("path");
 const provider = new ethers.JsonRpcProvider("http://localhost:8545");
 
 // Use the first account's private key (from Hardhat node output)
-const FIRST_ACCOUNT_PRIVATE_KEY = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // <-- replace with your actual key
+const FIRST_ACCOUNT_PRIVATE_KEY = process.env.FIRST_ACCOUNT_PRIVATE_KEY; // <-- replace with your actual key
 const signer = new ethers.Wallet(FIRST_ACCOUNT_PRIVATE_KEY, provider);
 
 // Load the contract ABI

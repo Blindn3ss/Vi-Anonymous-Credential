@@ -1,77 +1,77 @@
-# How to Test with the Blockchain
+# How to Set Up and Test the Blockchain Integration
 
-1. **Start the Blockchain Server**
+## 1. Prerequisites
 
-   Open a terminal in the `registry` folder and run:
-   ```
-   node blockchain_server.js
-   ```
-   You should see:
-   ```
-   Blockchain API running on port 3001
-   ```
+- Node.js and npm installed
+- Rust and Cargo installed
+- Hardhat and dependencies installed in the `registry` folder
 
-2. **Run the Rust Tests**
+## 2. Environment Setup
 
-   In a separate terminal, from the project root, run:
-   ```
-   cargo test --test issue_vc -- --nocapture
-   cargo test --test revoke_vc -- --nocapture
-   ```
-   This will:
-   - Issue a credential and add it to the blockchain.
-   - Revoke a credential and add the revocation to the blockchain.
+1. **Start the Hardhat Node**
 
-3. **Check Blockchain Server Output**
-
-   The blockchain server terminal will show logs like:
+   In the `registry` folder:
    ```
-   [ADD] Block added with data: "CredentialIssued:..."
-   [ADD] Block added with data: "CredentialRevoked:..."
-   [CHAIN] Chain requested
-   [VERIFY] Chain verification: true
+   npx hardhat node
    ```
 
-4. **(Optional) Query the Blockchain API**
+2. **Deploy the Smart Contract**
 
-   You can check the blockchain state using:
+   In a new terminal (also in `registry`):
    ```
-   curl http://localhost:3001/chain
+   npx hardhat run scripts/deploy.js --network localhost
    ```
+   - Copy the deployed contract address from the output.
 
-**Note:**  
-- The blockchain server must be running before you run the Rust tests.
-- Each test run will add new blocks to the blockchain.
+3. **Configure Environment Variables**
 
-# How to Use Smart Contracts with Hardhat
+   Create a `.env` file in the `registry` folder with:
+   ```
+   VC_REGISTRY_ADDRESS=0xYourDeployedContractAddress
+   FIRST_ACCOUNT_PRIVATE_KEY=0xYourHardhatAccountPrivateKey
+   ```
+   - Use the contract address from the deploy step.
+   - Use the private key of the first account shown when you start the Hardhat node.
 
-If you want to use smart contracts for VC issuance and revocation, you can use [Hardhat](https://hardhat.org/) to develop, deploy, and test contracts on Ethereum-compatible blockchains.
+## 3. Start the Blockchain API Server
 
-## 1. Install Hardhat
-
-In your project or a new directory:
-
-# Hardhat Setup Guide
-
-Follow these steps to set up Hardhat for smart contract development and testing:
-
-## 1. Initialize Hardhat in the `registry` Folder
-
-Open a terminal in the `registry` directory and run:
+In the `registry` folder:
 ```
-npx hardhat
+node src/blockchain_server.js
 ```
-- Choose "Create a basic sample project" (or "Create an empty hardhat.config.js" if you prefer).
-- Follow the prompts and install any suggested dependencies.
-
-## 2. Install Hardhat Toolbox (Optional but Recommended)
-
+You should see:
 ```
-npm install --save-dev @nomicfoundation/hardhat-toolbox
+Blockchain API running on port 3001 (Hardhat mode)
 ```
 
-## 3. Write Your Smart Contract
+## 4. Run the Rust Tests
 
+In the project root:
+```
+cargo test --test issue_vc_holder -- --nocapture
+cargo test --test issue_vc_holder_2 -- --nocapture
+```
+- These will issue credentials to different holders and interact with the blockchain via the Node.js API.
+
+## 5. Check Logs
+
+- The Node.js server terminal will show logs for each credential issued or revoked.
+- The Hardhat node terminal will show transaction logs for contract deployments and interactions.
+
+## 6. (Optional) Query the Blockchain API
+
+You can check the blockchain state or test endpoints using:
+```
+curl -X POST http://localhost:3001/add -H "Content-Type: application/json" -d "{\"credId\":\"0x...\",\"to\":\"0x...\"}"
+```
+or similar requests.
+
+---
+
+**Notes:**
+- Always start the Hardhat node and deploy the contract before running the server or tests.
+- Update `.env` with the correct contract address and private key after each deployment or node restart.
+- The Rust tests and Node.js server interact with the smart contract for VC issuance and revocation.
 Create a new file, for example:  
 `contracts/VCRegistry.sol`
 ```solidity
