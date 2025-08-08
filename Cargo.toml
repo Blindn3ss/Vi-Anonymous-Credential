@@ -7,6 +7,9 @@ edition = "2021"
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"
 rand = "0.8"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 # Arkworks - all aligned to v0.4
 ark-ec = "0.4"

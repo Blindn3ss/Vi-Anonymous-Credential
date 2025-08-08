@@ -31,14 +31,19 @@ fn main() {
     let message_count = 2;
     let params = SignatureParamsG1::<Bls12_381>::generate_using_rng(&mut rng, message_count);
     let fr_messages: Vec<Fr> = (0..message_count).map(|_| Fr::rand(&mut rng)).collect();
+
+    // Step 4: Issuer creates a BBS+ signature over the holder's messages
     let signature = SignatureG1::new(&mut rng, &fr_messages, &sk, &params).unwrap();
 
-    // Step 4: Create credential
+    // Step 5: Issuer constructs the Credential object
     let credential = Credential {
         signature: signature.clone(),
         messages: fr_messages.clone(),
-        issuer_pk: None,
+        issuer_pk: None, // Optionally, set issuer_pk to Some(pk)
     };
+
+    // Step 6: Issuer delivers the credential to the holder
+    // (In practice, this would be sent securely to the holder)
 
     println!(
         "type of signature: {}",
@@ -59,4 +64,19 @@ fn main() {
     // println!("\n[Test Case] Credential revoked");
     // println!("- delta (x) = {:?}", delta);
     // println!("- acc_val (after) = {:?}", acc.acc_val);
+
+    // --- Registry/Blockchain demo ---
+    // use registry::Blockchain;
+    // use std::time::{SystemTime, UNIX_EPOCH};
+
+    // let mut vdr = Blockchain::new();
+    // let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    // vdr.add_block("CredentialIssued:12345".to_string(), now);
+    // vdr.add_block("CredentialRevoked:12345".to_string(), now + 1);
+
+    // println!("\n[Registry] Blockchain state:");
+    // for block in &vdr.chain {
+    //     println!("{:?}", block);
+    // }
+    // println!("Chain valid? {}", vdr.verify_chain());
 }

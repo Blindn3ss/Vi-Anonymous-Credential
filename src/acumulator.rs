@@ -169,29 +169,27 @@ impl Accumulator {
     // remove an accumulated values - send the updated message for each holder to re-calculate their witness
     
     pub fn del(&mut self, sk: &SecretKey<Fr>, revoke_cred: Credential) -> Fr {
+        // 1. Compute credential ID from signature
+        let mut hasher = Sha256::new();
+        let mut sig_bytes = vec![];
+        revoke_cred.signature.serialize_compressed(&mut sig_bytes).unwrap();
+        hasher.update(sig_bytes);
+        let hash = hasher.finalize();
+        let cred_id = format!(
+            "cred_{}",
+            hash[..4].iter().map(|b| format!("{:02x}", b)).collect::<String>()
+        );
 
-            // Serialize the signature
-            let mut hasher = Sha256::new();
-            let mut sig_bytes = vec![];
-            revoke_cred.signature.serialize_compressed(&mut sig_bytes).unwrap();
-            hasher.update(sig_bytes);
-            let hash = hasher.finalize();
-            let cred_id = format!(
-                "cred_{}",
-                hash[..4].iter().map(|b| format!("{:02x}", b)).collect::<String>()
-            );
+        // 2. Get x associated with this credential
+        let delta = *self.get_x_by_id(&cred_id).unwrap();
 
-            // Get x associated with this credential
-            let delta = *self.get_x_by_id(&cred_id).unwrap();
-            // let delta = self.issued_x.get(&cred_id).unwrap(); // Option<&Fr>
-            // the delta shall be stored in some-where for all un-update valid holder still work
-            let sum = delta + sk.0;
-            let inv = sum.inverse().unwrap();
+        // 3. Update accumulator value to remove x
+        let sum = delta + sk.0;
+        let inv = sum.inverse().unwrap();
+        self.acc_val = self.acc_val.mul(inv);
 
-            // Update accumulator
-            self.acc_val = self.acc_val.mul(inv);
-
-            return delta;
+        // 4. Return the revoked x (delta)
+        return delta;
     }
     
     fn get_x_by_id(&self, cred_id: &str) -> Option<&Fr> {
@@ -209,7 +207,4 @@ impl Accumulator {
     pub fn get_parameter(&self) -> BBParams {
         self.parameter.clone().expect("Parameter of accumulator not been setup")
     }
-
-    
-    }
-
+}

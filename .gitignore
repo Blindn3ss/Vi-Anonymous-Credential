@@ -1,0 +1,34 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+
+# Cargo package files
+Cargo.lock
+
+# Node.js dependencies and build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# VSCode and JetBrains IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Byproducts
+*.log
+
+# Ignore compiled Lambda zips (if any)
+*.zip
+
+# Ignore dotenv files (if used)
+.env
+.env.*
+
+# Ignore test output
+*.out
